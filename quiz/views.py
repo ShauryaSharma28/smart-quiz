@@ -1,10 +1,10 @@
 from django.shortcuts import render
+from .models import QuizAttempt
 
-# Create your views here.
-from django.contrib import admin
-from .models import Quiz, Question, Answer, QuizAttempt
+def home(request):
+    return render(request, 'quiz/home.html')
 
-admin.site.register(Quiz)
-admin.site.register(Question)
-admin.site.register(Answer)
-admin.site.register(QuizAttempt)
+
+def leaderboard(request, quiz_id):
+    top_attempts = QuizAttempt.objects.filter(quiz_id=quiz_id).order_by('-score')[:10]
+    return render(request, 'leaderboard.html', {'top_attempts': top_attempts})

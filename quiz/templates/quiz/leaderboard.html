@@ -1,0 +1,6 @@
+<h2>Top Scores</h2>
+<ul>
+  {% for attempt in top_attempts %}
+    <li>{{ attempt.user.username }} - {{ attempt.score }}</li>
+  {% endfor %}
+</ul>
