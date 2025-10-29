@@ -40,3 +40,11 @@ class QuizAttempt(models.Model):
     
     def __str__(self):
         return f"{self.user.username} - {self.quiz.title} ({self.score})"
+    
+class UserAnswer(models.Model):
+    quiz_attempt = models.ForeignKey(QuizAttempt, on_delete=models.CASCADE)
+    question = models.ForeignKey(Question, on_delete=models.CASCADE)
+    selected_answer = models.ForeignKey(Answer, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return f"{self.quiz_attempt.user.username} - Q: {self.question.id} - A: {self.selected_answer.id}"

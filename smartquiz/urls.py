@@ -22,4 +22,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('quiz/', include('quiz.urls')),
     path('', lambda request: redirect('quiz/')),
+    path('accounts/', include('django.contrib.auth.urls')),   # <-- ADD THIS LINE HERE
 ]
+
+

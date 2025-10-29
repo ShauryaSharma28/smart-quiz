@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login | Smart Quiz</title>
+    <style>
+        body {
+            background: #f3f4f6;
+            font-family: 'Segoe UI', sans-serif;
+        }
+        .login-container {
+            background: #fff;
+            max-width: 360px;
+            margin: 60px auto;
+            padding: 40px 30px 32px 30px;
+            border-radius: 10px;
+            box-shadow: 0px 6px 24px rgba(60,60,94,0.07);
+        }
+        h2 {
+            text-align: center;
+            color: #375a7f;
+            margin-bottom: 28px;
+            font-weight: 500;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+        input[type="text"], input[type="password"] {
+            padding: 12px;
+            border: 1px solid #dbe4ee;
+            border-radius: 6px;
+            font-size: 16px;
+            background: #f9fafb;
+        }
+        button[type="submit"] {
+            padding: 11px 0;
+            border-radius: 6px;
+            background: #375a7f;
+            color: #fff;
+            font-size: 17px;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+            margin-top: 5px;
+            transition: 0.18s;
+        }
+        button[type="submit"]:hover {
+            background: #21406a;
+        }
+        .errorlist {
+            color: #b90000;
+            margin-bottom: 10px;
+        }
+        .form-label {
+            margin-bottom: 4px;
+            color: #6c7a89;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <h2>Login to Smart Quiz</h2>
+        {% if form.errors %}
+            <div class="errorlist">
+                Please enter a correct username and password.
+            </div>
+        {% endif %}
+        <form method="post" autocomplete="off">
+            {% csrf_token %}
+            <div>
+                <label class="form-label" for="id_username">Username</label>
+                {{ form.username }}
+            </div>
+            <div>
+                <label class="form-label" for="id_password">Password</label>
+                {{ form.password }}
+            </div>
+            <button type="submit">Log In</button>
+        </form>
+    </div>
+</body>
+</html>
