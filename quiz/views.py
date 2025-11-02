@@ -1,6 +1,8 @@
+# quiz/views.py  
+from django.utils import timezone
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, get_object_or_404
-from .models import QuizAttempt, UserAnswer, Answer
+from django.shortcuts import render, redirect, get_object_or_404
+from .models import Quiz, Question, Answer, QuizAttempt, UserAnswer
 
 @login_required
 def home(request):
@@ -37,3 +39,54 @@ def attempt_detail(request, attempt_id):
         'qa_details': qa_details,
     }
     return render(request, 'quiz/attempt_detail.html', context)
+
+
+@login_required
+def quiz_select(request):
+    quizzes = Quiz.objects.all().order_by("title")
+    return render(request, "quiz/quiz_select.html", {"quizzes": quizzes})
+
+@login_required
+def quiz_start(request, quiz_id):
+    quiz = get_object_or_404(Quiz, id=quiz_id)
+    attempt = QuizAttempt.objects.create(
+        user=request.user, quiz=quiz, started_at=timezone.now()
+    )
+    return redirect("quiz_take", attempt_id=attempt.id)
+
+@login_required
+def quiz_take(request, attempt_id):
+    attempt = get_object_or_404(QuizAttempt, id=attempt_id, user=request.user)
+    questions = attempt.quiz.questions.prefetch_related("answers")
+    return render(request, "quiz/quiz_take.html", {"attempt": attempt, "questions": questions})
+
+@login_required
+def quiz_submit(request, attempt_id):
+    attempt = get_object_or_404(QuizAttempt, id=attempt_id, user=request.user)
+    questions = attempt.quiz.questions.all()
+
+    # Optional server-side enforcement
+    if attempt.started_at and attempt.duration_seconds:
+        elapsed = (timezone.now() - attempt.started_at).total_seconds()
+        if elapsed > attempt.duration_seconds + 5:  # small grace period
+            return redirect("attempt_detail", attempt_id=attempt.id)
+
+    # Grade and store user answers
+    total_correct = 0
+    for q in questions:
+        selected_id = request.POST.get(f"q_{q.id}")
+        if not selected_id:
+            continue
+        selected = Answer.objects.filter(id=selected_id, question=q).first()
+        if not selected:
+            continue
+        UserAnswer.objects.create(
+            quiz_attempt=attempt, question=q, selected_answer=selected
+        )
+        if selected.is_correct:
+            total_correct += 1
+
+    attempt.score = total_correct
+    attempt.date_completed = timezone.now()
+    attempt.save()
+    return redirect("attempt_detail", attempt_id=attempt.id)

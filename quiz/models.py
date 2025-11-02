@@ -16,7 +16,7 @@ class Quiz(models.Model):
 
 # Model for the individual Question
 class Question(models.Model):
-    quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE)
+    quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, related_name="questions")
     question_text = models.TextField()
     
     def __str__(self):
@@ -24,19 +24,20 @@ class Question(models.Model):
 
 # Model for the Answer Choices
 class Answer(models.Model):
-    question = models.ForeignKey(Question, on_delete=models.CASCADE)
-    answer_text = models.CharField(max_length=200)
+    question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name="answers")
+    text = models.CharField(max_length=255)   # this field must exist
     is_correct = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
 
-    def __str__(self):
-        return f"{self.question.question_text[:20]} - {self.answer_text}"
 
 # Model to track user attempts and scores
 class QuizAttempt(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="attempts")
+    quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, related_name="attempts")
     score = models.IntegerField(default=0)
     date_completed = models.DateTimeField(auto_now_add=True)
+    started_at = models.DateTimeField(null=True, blank=True)        # optional timing
+    duration_seconds = models.IntegerField(default=600)              # 10 minutes default
     
     def __str__(self):
         return f"{self.user.username} - {self.quiz.title} ({self.score})"

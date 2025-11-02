@@ -3,55 +3,117 @@
 <head>
   <title>Smart Quiz Home</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <!-- Bootstrap 5 CDN -->
+
+  <!-- Bootstrap core + Icons -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
   <style>
-    body {
-      background: #f8f9fa;
+    /* Shared brand tokens (reuse across pages) */
+    :root{
+      --sq-primary: #2050a0;
+      --sq-accent:  #148cb4;
+      --sq-card-bg: #ffffff;
+      --sq-bg-grad: linear-gradient(180deg, #f4f8ff 0%, #f7fafc 100%);
     }
-    .container {
-      max-width: 540px;
-      margin-top: 60px;
-      padding: 32px 30px;
-      background: #fff;
-      box-shadow: 0 6px 32px rgba(60, 97, 143, 0.10);
-      border-radius: 18px;
+    body{ background: var(--sq-bg-grad); }
+
+    /* Gradient hero */
+    .sq-hero{
+      background: linear-gradient(90deg, rgba(32,80,160,.90), rgba(20,140,180,.90));
+      color:#fff;
+      padding: 42px 0;
+      box-shadow: 0 10px 28px rgba(32,80,160,.18);
     }
-    h1 {
-      font-size: 2rem;
-      font-weight: 800;
-      color: #2050a0;
+    .sq-hero h1{ font-weight: 800; letter-spacing: .3px; }
+    .sq-hero p{ opacity: .95; }
+
+    /* Card and sections */
+    .sq-section{ max-width: 900px; margin: 36px auto 56px; padding: 0 16px; }
+    .sq-card{
+      background: var(--sq-card-bg);
+      border-radius: 16px;
+      box-shadow: 0 14px 40px rgba(40,69,124,.12);
+      padding: 28px 26px;
+      animation: fadeInUp .55s ease both;
+    }
+
+    /* Buttons */
+    .sq-actions .btn{
+      height: 44px; display: inline-flex; align-items: center; justify-content: center;
+    }
+
+    /* Entrance */
+    @keyframes fadeInUp{
+      from{ opacity:0; transform: translateY(10px); }
+      to{ opacity:1; transform: translateY(0); }
     }
   </style>
 </head>
 <body>
-  <div class="container text-center">
-    <h1>Welcome to Smart Quiz!</h1>
-    <p class="mt-3 text-secondary">Your interactive platform to test knowledge and get instant results.</p>
+  {% include 'partials/navbar.html' %}
+  {% include 'partials/messages.html' %}
 
-    {% if latest_attempt %}
-      <div class="alert alert-info mt-4" role="alert">
-        Your latest quiz attempt: <strong>{{ latest_attempt.quiz.title }}</strong> with a score of <strong>{{ latest_attempt.score }}</strong> on {{ latest_attempt.date_completed|date:"M d, Y" }}.
-        <br>
-        <a href="{% url 'attempt_detail' latest_attempt.id %}" class="btn btn-sm btn-primary mt-2">Review Attempt</a>
-      </div>
-    {% else %}
-      <p class="mt-4 text-muted">You haven't attempted any quizzes yet.</p>
-    {% endif %}
+  <!-- Hero -->
+  <section class="sq-hero">
+    <div class="container text-center">
+      <h1 class="h2 mb-2"><i class="bi bi-lightning-charge-fill me-2"></i>Welcome to Smart Quiz</h1>
+      <p class="mb-0">Test your knowledge, track progress, and climb the leaderboard with instant results.</p>
+    </div>
+  </section>
 
-    <ul class="list-group mt-4 mb-3">
-      <li class="list-group-item">
-        <a class="btn btn-primary" href="/quiz/leaderboard/1/">Leaderboard (Quiz 1)</a>
-      </li>
-      <li class="list-group-item">
-        <a class="btn btn-info" href="{% url 'history' %}">Quiz History</a>
-      </li>
-      <li class="list-group-item">
-        <a class="btn btn-outline-secondary" href="/admin/">Admin Panel</a>
-      </li>
-    </ul>
-    <small class="d-block text-muted">Start a quiz or check your scores using the menu above. More features coming soon!</small>
+  <!-- Body card -->
+  <div class="sq-section">
+    <div class="sq-card text-center">
+
+      {# SHOW DIFFERENT ACTIONS FOR ADMINS VS STUDENTS #}
+      {% if user.is_staff %}
+        <div class="d-grid gap-3">
+          <a class="btn btn-primary" href="/admin/">
+            <i class="bi bi-gear me-1"></i>Admin dashboard
+          </a>
+          <a class="btn btn-outline-primary" href="{% url 'history' %}">
+            <i class="bi bi-clipboard2-check me-1"></i>Attempts (all users)
+          </a>
+        </div>
+      {% else %}
+        <div class="sq-actions row g-3">
+          <div class="col-12 col-md-4">
+            <a class="btn btn-success w-100" href="{% url 'quiz_select' %}">
+              <i class="bi bi-play-circle me-1"></i>Start a Quiz
+            </a>
+          </div>
+          <div class="col-12 col-md-4">
+            <a class="btn btn-outline-primary w-100" href="/quiz/leaderboard/1/">
+              <i class="bi bi-trophy me-1"></i>Leaderboard
+            </a>
+          </div>
+          <div class="col-12 col-md-4">
+            <a class="btn btn-outline-secondary w-100" href="{% url 'history' %}">
+              <i class="bi bi-clock-history me-1"></i>History
+            </a>
+          </div>
+        </div>
+      {% endif %}
+
+      <hr class="my-4">
+
+      {% if latest_attempt %}
+        <div class="alert alert-info text-start" role="alert">
+          <i class="bi bi-info-circle me-1"></i>
+          Latest attempt: <strong>{{ latest_attempt.quiz.title }}</strong> with score <strong>{{ latest_attempt.score }}</strong> on {{ latest_attempt.date_completed|date:"M d, Y" }}.
+          <a href="{% url 'attempt_detail' latest_attempt.id %}" class="btn btn-sm btn-primary ms-2">Review</a>
+        </div>
+      {% else %}
+        <p class="text-muted mb-0">You haven't attempted any quizzes yet. Start your first quiz now.</p>
+      {% endif %}
+    </div>
+
+    <div class="text-center mt-3 text-secondary small">
+      More features coming soon — categories, badges, and mobile‑first enhancements.
+    </div>
   </div>
+
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

@@ -3,48 +3,147 @@
 <head>
   <title>Quiz History | Smart Quiz</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <!-- Bootstrap core + Icons -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
   <style>
-    body { background: #f8f9fa; }
-    .container { max-width: 700px; margin-top: 60px; background: #fff; border-radius: 18px; box-shadow: 0 6px 32px rgba(60, 97, 143, 0.10); padding: 35px 35px; }
-    h2 { color: #2050a0; font-weight: 700; }
+    /* Shared theme tokens (reuse across pages) */
+    :root{
+      --sq-primary: #2050a0;
+      --sq-accent:  #148cb4;
+      --sq-card-bg: #ffffff;
+      --sq-bg-grad: linear-gradient(180deg, #f4f8ff 0%, #f7fafc 100%);
+    }
+
+    body{ background: var(--sq-bg-grad); }
+
+    /* Glass/gradient top band (pairs with navbar include) */
+    .sq-hero{
+      background: linear-gradient(90deg, rgba(32,80,160,.85), rgba(20,140,180,.85));
+      color:#fff;
+      backdrop-filter: saturate(140%) blur(10px);
+      -webkit-backdrop-filter: saturate(140%) blur(10px);
+      box-shadow: 0 10px 28px rgba(32,80,160,.18);
+    }
+
+    /* Section shell + animated card */
+    .sq-section{ max-width: 900px; margin: 56px auto; padding: 0 16px; }
+    .sq-card{
+      background: var(--sq-card-bg);
+      border-radius: 16px;
+      box-shadow: 0 14px 40px rgba(40,69,124,.12);
+      padding: 26px 24px;
+      animation: fadeInUp .55s ease both;
+    }
+
+    /* Table polish */
+    .table{ margin: 0; }
+    thead.table-light th{
+      color:#2e467c;
+    }
+    .table-hover tbody tr{
+      transition: background-color .25s ease, transform .15s ease;
+    }
+    .table-hover tbody tr:hover{
+      background: #f7fbff;
+      transform: translateY(-1px);
+    }
+
+    .sq-title{
+      color: var(--sq-primary);
+      font-weight: 800;
+      letter-spacing: .2px;
+    }
+
+    .sq-chip{
+      display:inline-block; padding:6px 10px; border-radius:999px;
+      background:#eef5ff; color: var(--sq-primary); font-size:.85rem;
+    }
+
+    /* Entrance */
+    @keyframes fadeInUp{
+      from{ opacity:0; transform: translateY(10px); }
+      to{ opacity:1; transform: translateY(0); }
+    }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h2 class="mb-4 text-center">Your Quiz History</h2>
-    <table class="table table-striped table-hover align-middle">
-      <thead>
-        <tr>
-          <th>#</th>
-          <th>Quiz Title</th>
-          <th>Score</th>
-          <th>Date Completed</th>
-          <th>Review</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for attempt in attempts %}
-        <tr>
-          <td>{{ forloop.counter }}</td>
-          <td>{{ attempt.quiz.title }}</td>
-          <td>{{ attempt.score }}</td>
-          <td>{{ attempt.date_completed|date:"M d, Y H:i" }}</td>
-          <td>
-            <a href="{% url 'attempt_detail' attempt.id %}" class="btn btn-outline-primary btn-sm">View</a>
-          </td>
-        </tr>
-        {% empty %}
-        <tr>
-          <td colspan="5" class="text-secondary text-center">You haven't completed any quizzes yet.</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-    <div class="text-end mt-3">
-      <a class="btn btn-link" href="/quiz/">← Back to Home</a>
+  {% include 'partials/navbar.html' %}
+  {% include 'partials/messages.html' %}
+
+  <!-- Optional hero band -->
+  <div class="sq-hero py-3">
+    <div class="container d-flex justify-content-between align-items-center">
+      <div class="fw-semibold">
+        <i class="bi bi-clock-history me-2"></i>Your Quiz History
+      </div>
+      <span class="sq-chip"><i class="bi bi-collection me-1"></i>{{ attempts|length }} attempts</span>
     </div>
   </div>
+
+  <div class="sq-section">
+    <div class="sq-card">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <h2 class="sq-title h4 mb-0"><i class="bi bi-journal-text me-2"></i>Attempts</h2>
+      </div>
+
+      <div class="table-responsive">
+        <table class="table table-hover table-borderless align-middle">
+          <thead class="table-light">
+            <tr>
+              <th style="width:72px;">#</th>
+              <th>Quiz Title</th>
+              <th>Score</th>
+              <th>Date Completed</th>
+              <th class="text-end">Review</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for attempt in attempts %}
+            <tr>
+              <td class="fw-semibold">{{ forloop.counter }}</td>
+              <td>{{ attempt.quiz.title }}</td>
+              <td>
+                <span class="badge text-bg-primary"><i class="bi bi-star-fill me-1 text-warning"></i>{{ attempt.score }}</span>
+              </td>
+              <td class="text-muted">{{ attempt.date_completed|date:"M d, Y H:i" }}</td>
+              <td class="text-end">
+                <a href="{% url 'attempt_detail' attempt.id %}" class="btn btn-sm btn-outline-primary">
+                  <i class="bi bi-eye me-1"></i>View
+                </a>
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="5" class="text-secondary text-center py-4">
+                <i class="bi bi-inboxes me-1"></i>You haven't completed any quizzes yet.
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="d-flex justify-content-between mt-3">
+        <a class="btn btn-outline-secondary" href="/quiz/"><i class="bi bi-house-door me-1"></i>Back to Home</a>
+
+        <!-- Optional pagination (hook up when you paginate attempts in the view) -->
+        {# 
+        <nav aria-label="Attempts pagination">
+          <ul class="pagination pagination-sm mb-0">
+            <li class="page-item"><a class="page-link" href="#">&laquo;</a></li>
+            <li class="page-item active"><a class="page-link" href="#">1</a></li>
+            <li class="page-item"><a class="page-link" href="#">2</a></li>
+            <li class="page-item"><a class="page-link" href="#">&raquo;</a></li>
+          </ul>
+        </nav>
+        #}
+      </div>
+    </div>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
