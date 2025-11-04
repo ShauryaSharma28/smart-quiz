@@ -82,7 +82,7 @@
             {% for opt in q.answers.all %}
             <div class="form-check">
               <input class="form-check-input" type="radio" name="q_{{ q.id }}" id="q{{ q.id }}_{{ opt.id }}" value="{{ opt.id }}">
-              <label class="form-check-label" for="q{{ q.id }}_{{ opt.id }}">{{ opt.answer_text }}</label>
+              <label class="form-check-label" for="q{{ q.id }}_{{ opt.id }}">{{ opt.text }}</label>
             </div>
             {% endfor %}
           </li>
