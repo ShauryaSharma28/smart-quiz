@@ -22,16 +22,17 @@ def history(request):
 @login_required
 def attempt_detail(request, attempt_id):
     attempt = get_object_or_404(QuizAttempt, id=attempt_id, user=request.user)
-    user_answers = UserAnswer.objects.filter(quiz_attempt=attempt)
+    user_answers = UserAnswer.objects.select_related("question", "selected_answer").filter(quiz_attempt=attempt)
 
     qa_details = []
     for ua in user_answers:
         q = ua.question
         answers = Answer.objects.filter(question=q)
+        # Use "text" below if your Answer model field is named "text"; if answer_text, use that
         qa_details.append({
-            'question': q,
-            'answers': answers,
-            'selected_answer_id': ua.selected_answer.id,
+            'question': q,                           # must have question_text attribute in template
+            'answers': answers,                      # answer objects with text (or answer_text), id, and is_correct
+            'selected_answer_id': ua.selected_answer.id if ua.selected_answer else None,
         })
 
     context = {
@@ -39,6 +40,7 @@ def attempt_detail(request, attempt_id):
         'qa_details': qa_details,
     }
     return render(request, 'quiz/attempt_detail.html', context)
+
 
 
 @login_required

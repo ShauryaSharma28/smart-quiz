@@ -3,118 +3,60 @@
 <head>
   <title>Attempt Details | Smart Quiz</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-  <style>
-    body { background: #f8f9fa; }
-    .container { max-width: 750px; margin-top: 58px; background: #fff; border-radius: 18px; box-shadow: 0 6px 32px rgba(60, 97, 143, 0.08); padding: 32px 45px; }
-    h2 { color: #2050a0; font-weight: 700; }
-    .correct { color: #198754; font-weight: 600; }
-    .incorrect { color: #dc3545; font-weight: 600; }
-  </style>
-</head>
-<body><!DOCTYPE html>
-<html>
-<head>
-  <title>Attempt Details | Smart Quiz</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
 
   <!-- Bootstrap core + Icons -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
 
   <style>
-    /* Theme palette (reuse on other pages for consistent branding) */
     :root{
-      --sq-primary: #2050a0;         /* primary brand */
-      --sq-accent:  #148cb4;         /* gradient accent */
+      --sq-primary: #2050a0;
+      --sq-accent:  #148cb4;
       --sq-success: #198754;
       --sq-danger:  #dc3545;
       --sq-card-bg: #ffffff;
       --sq-bg-grad: linear-gradient(180deg, #f4f8ff 0%, #f7fafc 100%);
     }
-
-    body{
-      background: var(--sq-bg-grad);
-    }
-
-    /* Glass/gradient header band (shared with navbar include) */
+    body{ background: var(--sq-bg-grad);}
     .sq-hero{
       background: linear-gradient(90deg, rgba(32,80,160,.85), rgba(20,140,180,.85));
-      color:#fff;
-      backdrop-filter: saturate(140%) blur(10px);
+      color:#fff; backdrop-filter: saturate(140%) blur(10px);
       -webkit-backdrop-filter: saturate(140%) blur(10px);
       box-shadow: 0 10px 28px rgba(32,80,160,.18);
     }
-
-    /* Card shell + entry animation */
     .sq-section{ max-width: 900px; margin: 56px auto; padding: 0 16px; }
     .sq-card{
       background: var(--sq-card-bg);
-      border-radius: 16px;
-      box-shadow: 0 14px 40px rgba(40,69,124,.12);
+      border-radius: 16px; box-shadow: 0 14px 40px rgba(40,69,124,.12);
       padding: 28px 28px;
       animation: fadeInUp .6s ease both;
     }
-
-    /* Page title */
-    .sq-title{
-      color: var(--sq-primary);
-      font-weight: 800;
-      letter-spacing: .2px;
-    }
-
-    /* List styling + subtle hover and separators */
+    .sq-title{ color: var(--sq-primary); font-weight: 800; letter-spacing: .2px;}
     .list-group-item{
-      border: 0;
-      border-bottom: 1px solid rgba(32,80,160,.08);
+      border: 0; border-bottom: 1px solid rgba(32,80,160,.08);
       transition: background-color .25s ease, transform .15s ease;
     }
     .list-group-item:hover{
-      background: #f7fbff;
-      transform: translateY(-1px);
+      background: #f7fbff; transform: translateY(-1px);
     }
-
-    /* Correct/incorrect states */
-    .correct{
-      color: var(--sq-success);
-      font-weight: 600;
-    }
-    .incorrect{
-      color: var(--sq-danger);
-      font-weight: 600;
-    }
-
-    /* Staggered reveal for questions */
-    .sq-stagger > li{ opacity: 0; animation: fadeIn .45s ease forwards; }
-    .sq-stagger > li:nth-child(1){ animation-delay: .05s; }
-    .sq-stagger > li:nth-child(2){ animation-delay: .10s; }
-    .sq-stagger > li:nth-child(3){ animation-delay: .15s; }
-    .sq-stagger > li:nth-child(4){ animation-delay: .20s; }
-    .sq-stagger > li:nth-child(5){ animation-delay: .25s; }
-    /* add more nth-child as needed */
-
-    /* Small chips/badges */
-    .sq-chip{
-      display:inline-block; padding:6px 10px; border-radius:999px;
-      background:#eef5ff; color: var(--sq-primary); font-size:.85rem;
-    }
-
-    /* Keyframe animations */
-    @keyframes fadeInUp{
-      from{ opacity:0; transform: translateY(10px); }
-      to{ opacity:1; transform: translateY(0); }
-    }
-    @keyframes fadeIn{
-      from{ opacity:0; }
-      to{ opacity:1; }
-    }
+    .correct{ color: var(--sq-success); font-weight: 600;}
+    .incorrect{ color: var(--sq-danger); font-weight: 600;}
+    .sq-stagger > li{ opacity: 0; animation: fadeIn .45s ease forwards;}
+    .sq-stagger > li:nth-child(1){ animation-delay: .05s;}
+    .sq-stagger > li:nth-child(2){ animation-delay: .10s;}
+    .sq-stagger > li:nth-child(3){ animation-delay: .15s;}
+    .sq-stagger > li:nth-child(4){ animation-delay: .20s;}
+    .sq-stagger > li:nth-child(5){ animation-delay: .25s;}
+    .sq-chip{ display:inline-block; padding:6px 10px; border-radius:999px;
+      background:#eef5ff; color: var(--sq-primary); font-size:.85rem;}
+    @keyframes fadeInUp{ from{ opacity:0; transform: translateY(10px);} to{ opacity:1; transform: translateY(0);}}
+    @keyframes fadeIn{ from{ opacity:0;} to{ opacity:1;}}
   </style>
 </head>
 <body>
   {% include 'partials/navbar.html' %}
   {% include 'partials/messages.html' %}
 
-  <!-- Optional hero band for context -->
   <div class="sq-hero py-3">
     <div class="container d-flex justify-content-between align-items-center">
       <div class="fw-semibold">
@@ -163,7 +105,7 @@
                     <i class="bi bi-circle"></i>
                   {% endif %}
                 </span>
-                {{ answer.answer_text }}
+                {{ answer.text }}
                 {% if answer.id == qa.selected_answer_id %}
                   <span class="text-muted ms-1">(Your answer)</span>
                 {% elif answer.is_correct %}
@@ -184,52 +126,6 @@
           <i class="bi bi-house-door me-1"></i>Home
         </a>
       </div>
-    </div>
-  </div>
-
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-</html>
-
-  {% include 'partials/navbar.html' %}
-  {% include 'partials/messages.html' %}
-  <div class="container">
-    <h2 class="mb-3">Quiz Review: {{ attempt.quiz.title }}</h2>
-    <div class="mb-3">
-      <strong>Quiz Score:</strong> {{ attempt.score }}<br>
-      <strong>Date:</strong> {{ attempt.date_completed|date:"M d, Y H:i" }}
-    </div>
-    <ol class="list-group list-group-numbered">
-      {% for qa in qa_details %}
-      <li class="list-group-item">
-        <div>
-          <strong>Q{{ forloop.counter }}:</strong> {{ qa.question.question_text }}
-        </div>
-        <ul>
-          {% for answer in qa.answers %}
-            <li
-              {% if answer.id == qa.selected_answer_id %}
-                class="{% if answer.is_correct %}correct{% else %}incorrect{% endif %}"
-              {% elif answer.is_correct %}
-                class="correct"
-              {% endif %}
-            >
-              {{ answer.answer_text }}
-              {% if answer.id == qa.selected_answer_id %} 
-                <span>(Your Answer)</span>
-                {% if answer.is_correct %} ✔️ {% else %} ❌ {% endif %}
-              {% elif answer.is_correct %}
-                <span>(Correct Answer)</span> ✔️
-              {% endif %}
-            </li>
-          {% endfor %}
-        </ul>
-      </li>
-      {% endfor %}
-    </ol>
-    <div class="mt-4">
-      <a class="btn btn-primary" href="{% url 'history' %}">← Back to History</a>
-      <a class="btn btn-link" href="/quiz/">Home</a>
     </div>
   </div>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

@@ -1,7 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
 
-
 class Quiz(models.Model):
     title = models.CharField(max_length=200, unique=True)
     description = models.TextField(blank=True)
@@ -12,7 +11,6 @@ class Quiz(models.Model):
     def __str__(self):
         return self.title
 
-
 class Question(models.Model):
     quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, related_name="questions")
     question_text = models.TextField()
@@ -20,31 +18,27 @@ class Question(models.Model):
     def __str__(self):
         return self.question_text[:50]
 
-
 class Answer(models.Model):
     question = models.ForeignKey(Question, on_delete=models.CASCADE, related_name="answers")
     text = models.CharField(max_length=255)
     is_correct = models.BooleanField(default=False)
-    # Remove created_at if not needed to avoid migration complexities
-    # created_at = models.DateTimeField(auto_now_add=True)
+    # created_at = models.DateTimeField(auto_now_add=True)  # UNCOMMENT if you want answer timestamps
 
     def __str__(self):
-        # Optional: a nice display in admin and shell
+        # Shows ✔️ on correct answers for admin/consoles
         prefix = "✔️ " if self.is_correct else ""
         return f"{prefix}{self.text[:60]}"
-
 
 class QuizAttempt(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="attempts")
     quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, related_name="attempts")
     score = models.IntegerField(default=0)
     date_completed = models.DateTimeField(auto_now_add=True)
-    started_at = models.DateTimeField(null=True, blank=True)  # optional timing
-    duration_seconds = models.IntegerField(default=600)       # 10 minutes default
+    started_at = models.DateTimeField(null=True, blank=True)  # optional timer
+    duration_seconds = models.IntegerField(default=600)       # default duration 10min
 
     def __str__(self):
         return f"{self.user.username} - {self.quiz.title} ({self.score})"
-
 
 class UserAnswer(models.Model):
     quiz_attempt = models.ForeignKey(QuizAttempt, on_delete=models.CASCADE)
@@ -52,7 +46,7 @@ class UserAnswer(models.Model):
     selected_answer = models.ForeignKey(Answer, on_delete=models.CASCADE)
 
     class Meta:
-        unique_together = ('quiz_attempt', 'question')  # prevent multiple answers per question per attempt
+        unique_together = ('quiz_attempt', 'question')
 
     def __str__(self):
         return f"{self.quiz_attempt.user.username} - Q: {self.question.id} - A: {self.selected_answer.id}"
