@@ -1,10 +1,6 @@
-from django.shortcuts import redirect
 from django.urls import path
 from . import views
-
-# quiz/urls.py  (additions)
-from django.urls import path
-from . import views
+from .views import signup
 
 urlpatterns = [
     path('', views.home, name='home'),
@@ -15,6 +11,5 @@ urlpatterns = [
     path('leaderboard/<int:quiz_id>/', views.leaderboard, name='leaderboard'),
     path('history/', views.history, name='history'),
     path('attempt/<int:attempt_id>/', views.attempt_detail, name='attempt_detail'),
-    path('', lambda request: redirect('home')), 
+    path('signup/', signup, name='signup'),
 ]
-

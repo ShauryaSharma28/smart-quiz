@@ -1,8 +1,10 @@
-# quiz/views.py  
 from django.utils import timezone
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Quiz, Question, Answer, QuizAttempt, UserAnswer
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth import login
+
 
 @login_required
 def home(request):
@@ -14,24 +16,34 @@ def leaderboard(request, quiz_id):
     top_attempts = QuizAttempt.objects.filter(quiz_id=quiz_id).order_by('-score')[:10]
     return render(request, 'quiz/leaderboard.html', {'top_attempts': top_attempts})
 
+
 @login_required
 def history(request):
-    attempts = QuizAttempt.objects.filter(user=request.user).order_by('-date_completed')
+    if request.user.is_staff:
+        # If user is admin/staff, show all attempts
+        attempts = QuizAttempt.objects.all().order_by('-date_completed')
+    else:
+        # Otherwise, show only their own attempts
+        attempts = QuizAttempt.objects.filter(user=request.user).order_by('-date_completed')
     return render(request, 'quiz/history.html', {'attempts': attempts})
+
 
 @login_required
 def attempt_detail(request, attempt_id):
-    attempt = get_object_or_404(QuizAttempt, id=attempt_id, user=request.user)
+    if request.user.is_staff:
+        attempt = get_object_or_404(QuizAttempt, id=attempt_id)
+    else:
+        attempt = get_object_or_404(QuizAttempt, id=attempt_id, user=request.user)
+
     user_answers = UserAnswer.objects.select_related("question", "selected_answer").filter(quiz_attempt=attempt)
 
     qa_details = []
     for ua in user_answers:
         q = ua.question
         answers = Answer.objects.filter(question=q)
-        # Use "text" below if your Answer model field is named "text"; if answer_text, use that
         qa_details.append({
-            'question': q,                           # must have question_text attribute in template
-            'answers': answers,                      # answer objects with text (or answer_text), id, and is_correct
+            'question': q,
+            'answers': answers,
             'selected_answer_id': ua.selected_answer.id if ua.selected_answer else None,
         })
 
@@ -44,11 +56,6 @@ def attempt_detail(request, attempt_id):
 
 
 @login_required
-def quiz_select(request):
-    quizzes = Quiz.objects.all().order_by("title")
-    return render(request, "quiz/quiz_select.html", {"quizzes": quizzes})
-
-@login_required
 def quiz_start(request, quiz_id):
     quiz = get_object_or_404(Quiz, id=quiz_id)
     attempt = QuizAttempt.objects.create(
@@ -56,18 +63,20 @@ def quiz_start(request, quiz_id):
     )
     return redirect("quiz_take", attempt_id=attempt.id)
 
+
 @login_required
 def quiz_take(request, attempt_id):
     attempt = get_object_or_404(QuizAttempt, id=attempt_id, user=request.user)
     questions = attempt.quiz.questions.prefetch_related("answers")
     return render(request, "quiz/quiz_take.html", {"attempt": attempt, "questions": questions})
 
+
 @login_required
 def quiz_submit(request, attempt_id):
     attempt = get_object_or_404(QuizAttempt, id=attempt_id, user=request.user)
     questions = attempt.quiz.questions.all()
 
-    # Optional server-side enforcement
+    # Optional server-side enforcement of quiz duration
     if attempt.started_at and attempt.duration_seconds:
         elapsed = (timezone.now() - attempt.started_at).total_seconds()
         if elapsed > attempt.duration_seconds + 5:  # small grace period
@@ -92,3 +101,21 @@ def quiz_submit(request, attempt_id):
     attempt.date_completed = timezone.now()
     attempt.save()
     return redirect("attempt_detail", attempt_id=attempt.id)
+
+
+def signup(request):
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)  # Log the user in directly after signup
+            return redirect('home')  # Or redirect to quiz selection
+    else:
+        form = UserCreationForm()
+    return render(request, 'registration/signup.html', {'form': form})
+
+@login_required
+def quiz_select(request):
+    quizzes = Quiz.objects.all().order_by("title")
+    return render(request, "quiz/quiz_select.html", {"quizzes": quizzes})
+

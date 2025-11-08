@@ -1,25 +1,19 @@
+{% load static %}
 <!DOCTYPE html>
 <html>
 <head>
   <title>Quiz History | Smart Quiz</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-
-  <!-- Bootstrap core + Icons -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
-
   <style>
-    /* Shared theme tokens (reuse across pages) */
     :root{
       --sq-primary: #2050a0;
       --sq-accent:  #148cb4;
       --sq-card-bg: #ffffff;
       --sq-bg-grad: linear-gradient(180deg, #f4f8ff 0%, #f7fafc 100%);
     }
-
     body{ background: var(--sq-bg-grad); }
-
-    /* Glass/gradient top band (pairs with navbar include) */
     .sq-hero{
       background: linear-gradient(90deg, rgba(32,80,160,.85), rgba(20,140,180,.85));
       color:#fff;
@@ -27,8 +21,6 @@
       -webkit-backdrop-filter: saturate(140%) blur(10px);
       box-shadow: 0 10px 28px rgba(32,80,160,.18);
     }
-
-    /* Section shell + animated card */
     .sq-section{ max-width: 900px; margin: 56px auto; padding: 0 16px; }
     .sq-card{
       background: var(--sq-card-bg);
@@ -37,8 +29,6 @@
       padding: 26px 24px;
       animation: fadeInUp .55s ease both;
     }
-
-    /* Table polish */
     .table{ margin: 0; }
     thead.table-light th{
       color:#2e467c;
@@ -50,19 +40,15 @@
       background: #f7fbff;
       transform: translateY(-1px);
     }
-
     .sq-title{
       color: var(--sq-primary);
       font-weight: 800;
       letter-spacing: .2px;
     }
-
     .sq-chip{
       display:inline-block; padding:6px 10px; border-radius:999px;
       background:#eef5ff; color: var(--sq-primary); font-size:.85rem;
     }
-
-    /* Entrance */
     @keyframes fadeInUp{
       from{ opacity:0; transform: translateY(10px); }
       to{ opacity:1; transform: translateY(0); }
@@ -73,11 +59,15 @@
   {% include 'partials/navbar.html' %}
   {% include 'partials/messages.html' %}
 
-  <!-- Optional hero band -->
   <div class="sq-hero py-3">
     <div class="container d-flex justify-content-between align-items-center">
       <div class="fw-semibold">
-        <i class="bi bi-clock-history me-2"></i>Your Quiz History
+        <i class="bi bi-clock-history me-2"></i>
+        {% if request.user.is_staff %}
+          All Quiz Attempts
+        {% else %}
+          Your Quiz History
+        {% endif %}
       </div>
       <span class="sq-chip"><i class="bi bi-collection me-1"></i>{{ attempts|length }} attempts</span>
     </div>
@@ -94,6 +84,9 @@
           <thead class="table-light">
             <tr>
               <th style="width:72px;">#</th>
+              {% if request.user.is_staff %}
+                <th>User</th>
+              {% endif %}
               <th>Quiz Title</th>
               <th>Score</th>
               <th>Date Completed</th>
@@ -104,9 +97,14 @@
             {% for attempt in attempts %}
             <tr>
               <td class="fw-semibold">{{ forloop.counter }}</td>
+              {% if request.user.is_staff %}
+                <td>{{ attempt.user.username }}</td>
+              {% endif %}
               <td>{{ attempt.quiz.title }}</td>
               <td>
-                <span class="badge text-bg-primary"><i class="bi bi-star-fill me-1 text-warning"></i>{{ attempt.score }}</span>
+                <span class="badge text-bg-primary">
+                  <i class="bi bi-star-fill me-1 text-warning"></i>{{ attempt.score }}
+                </span>
               </td>
               <td class="text-muted">{{ attempt.date_completed|date:"M d, Y H:i" }}</td>
               <td class="text-end">
@@ -117,7 +115,7 @@
             </tr>
             {% empty %}
             <tr>
-              <td colspan="5" class="text-secondary text-center py-4">
+              <td colspan="{% if request.user.is_staff %}6{% else %}5{% endif %}" class="text-secondary text-center py-4">
                 <i class="bi bi-inboxes me-1"></i>You haven't completed any quizzes yet.
               </td>
             </tr>
@@ -127,19 +125,9 @@
       </div>
 
       <div class="d-flex justify-content-between mt-3">
-        <a class="btn btn-outline-secondary" href="/quiz/"><i class="bi bi-house-door me-1"></i>Back to Home</a>
-
-        <!-- Optional pagination (hook up when you paginate attempts in the view) -->
-        {# 
-        <nav aria-label="Attempts pagination">
-          <ul class="pagination pagination-sm mb-0">
-            <li class="page-item"><a class="page-link" href="#">&laquo;</a></li>
-            <li class="page-item active"><a class="page-link" href="#">1</a></li>
-            <li class="page-item"><a class="page-link" href="#">2</a></li>
-            <li class="page-item"><a class="page-link" href="#">&raquo;</a></li>
-          </ul>
-        </nav>
-        #}
+        <a class="btn btn-outline-secondary" href="{% url 'home' %}">
+          <i class="bi bi-house-door me-1"></i>Back to Home
+        </a>
       </div>
     </div>
   </div>
